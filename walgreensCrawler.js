@@ -1,9 +1,4 @@
-const axios = require("axios");
-const cheerio = require("cheerio");
-const puppeteer = require("puppeteer");
 const { crawlPage } = require("./crawlPage");
-const { clickOnLink } = require("./clickOnLink");
-const { getUrlsFromHtml } = require("./getUrlsFromHtml");
 
 const url =
   process.argv.length >= 3 ? process.argv[2] : "https://www.walgreens.com";
@@ -15,11 +10,10 @@ async function walgreensCrawler(url) {
   }
   console.log("start crawl " + url);
 
-  crawlPage(url);
-  // let page = clickOnLink(url, "Household");
-  // let currentUrl = await page.evaluate(() => window.location.href);
-  // console.log(currentUrl);
-  // return currentUrl;
+  const pages = await crawlPage(url, url, {}, new Set(), { products: [] });
+  for (const page of pages) {
+    console.log(page);
+  }
 }
 
 walgreensCrawler(url);
