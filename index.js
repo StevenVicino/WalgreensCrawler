@@ -13,7 +13,11 @@ async function walgreensCrawler(url) {
 
   const crawler = new Crawler(url, url);
   const products = await crawler.crawlPage(url);
-  console.log(products);
+  const productsJson = JSON.stringify(products);
+  console.log(productsJson);
+  return productsJson;
 }
 
 walgreensCrawler(url);
+
+module.exports = { walgreensCrawler, url };

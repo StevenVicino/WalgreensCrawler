@@ -2,7 +2,6 @@ const { JSDOM } = require("jsdom");
 
 function getUrlsFromHtml(html, baseUrl, currentUrl) {
   const urls = [];
-
   const dom = new JSDOM(html);
   const links = dom.window.document.querySelectorAll("a");
 
@@ -44,7 +43,6 @@ function getUrlsFromHtml(html, baseUrl, currentUrl) {
       }
     }
   }
-
   return urls;
 }
 

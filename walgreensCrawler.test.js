@@ -1,62 +1,29 @@
-const { walgreensCrawler, url } = require("./walgreensCrawler");
-const { getUrlsFromHtml } = require("./getUrlsFromHtml");
+const { walgreensCrawler, url } = require("./index");
 const { test, expect } = require("@jest/globals");
 
-// test("walgreensCrawler ", () => {
-//   const actual = walgreensCrawler(url);
-//   const expected = url;
-//   expect(actual).toEqual(expected);
-// });
+describe("walgreensCrawler", () => {
+  test("should crawl Walgreens website and return a valid JSON", async () => {
+    const output = await walgreensCrawler(url);
+    expect(() => JSON.parse(output)).not.toThrow();
+  });
 
-test("getUrlsFromHtml absolute", () => {
-  const html = `<html> 
-    <body>
-    <a href="https://www.walgreens.com">Walgreens</a>
-    </body>
-    </html>`;
-  const actual = getUrlsFromHtml(html, url);
-  const expected = ["https://www.walgreens.com/"];
-  expect(actual).toEqual(expected);
-});
+  test("should return JSON with at least 10 objects", async () => {
+    const output = await walgreensCrawler(url);
+    const parsedOutput = JSON.parse(output);
+    expect(parsedOutput.length).toBeGreaterThanOrEqual(10);
+  });
 
-test("getUrlsFromHtml relative", () => {
-  const html = `<html> 
-    <body>
-    <a href="/path/">Walgreens</a>
-    </body>
-    </html>`;
-  const actual = getUrlsFromHtml(html, url);
-  const expected = ["https://www.walgreens.com/path/"];
-  expect(actual).toEqual(expected);
-});
-
-test("getUrlsFromHtml relative and absolute", () => {
-  const html = `<html> 
-    <body>
-    <a href="https://www.walgreens.com">Walgreens</a>
-    <a href="/path/">Walgreens</a>
-    </body>
-    </html>`;
-  const actual = getUrlsFromHtml(html, url);
-  const expected = [
-    "https://www.walgreens.com/",
-    "https://www.walgreens.com/path/",
-  ];
-  expect(actual).toEqual(expected);
-});
-
-test("getUrlsFromHtml invalid", () => {
-  const html = `<html> 
-    <body>
-    <a href="Invalid">Invalid Url</a>
-    <a href="https://www.walgreens.com">Walgreens</a>
-    <a href="/path/">Walgreens</a>
-    </body>
-    </html>`;
-  const actual = getUrlsFromHtml(html, url);
-  const expected = [
-    "https://www.walgreens.com/",
-    "https://www.walgreens.com/path/",
-  ];
-  expect(actual).toEqual(expected);
+  test("Each object within the JSON should have keys 'id', 'productName', 'listPrice', 'description', 'productDimensions', 'imageURLs', 'productUPC', and 'sourceURL'", async () => {
+    const output = await walgreensCrawler(url);
+    const parsedOutput = JSON.parse(output);
+    parsedOutput.forEach((product) => {
+      expect(product).toHaveProperty("id");
+      expect(product).toHaveProperty("productName");
+      expect(product).toHaveProperty("listPrice");
+      expect(product).toHaveProperty("description");
+      expect(product).toHaveProperty("imageURLs");
+      expect(product).toHaveProperty("productUPC");
+      expect(product).toHaveProperty("sourceURL");
+    });
+  });
 });
