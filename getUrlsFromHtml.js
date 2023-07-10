@@ -5,6 +5,7 @@ function getUrlsFromHtml(html, baseUrl, currentUrl) {
 
   const dom = new JSDOM(html);
   const links = dom.window.document.querySelectorAll("a");
+
   if (currentUrl === "https://www.walgreens.com") {
     for (const link of links) {
       if (link.href.includes("Household")) {
@@ -43,6 +44,7 @@ function getUrlsFromHtml(html, baseUrl, currentUrl) {
       }
     }
   }
+
   return urls;
 }
 

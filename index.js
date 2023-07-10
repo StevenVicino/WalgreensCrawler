@@ -1,4 +1,4 @@
-const { crawlPage } = require("./crawlPage");
+const Crawler = require("./Crawler");
 
 const url =
   process.argv.length >= 3 ? process.argv[2] : "https://www.walgreens.com";
@@ -8,17 +8,12 @@ async function walgreensCrawler(url) {
     console.log("no website");
     process.exit(1);
   }
+
   console.log("start crawl " + url);
 
-  const pages = await crawlPage(url, url, {}, new Set(), { products: [] });
-  for (const page of pages) {
-    console.log(page);
-  }
+  const crawler = new Crawler(url, url);
+  const products = await crawler.crawlPage(url);
+  console.log(products);
 }
 
 walgreensCrawler(url);
-
-module.exports = {
-  walgreensCrawler,
-  url,
-};
