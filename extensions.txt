@@ -1,0 +1,9 @@
+EXTENSIONS:
+
+1. Handling Products outside of the Household Essentials category:
+   To handle products from different categories, modify the getUrlsFromHtml function in getUrlsFromHtml.js. Identify the relevant HTML elements and patterns specific to the desired category and extract the corresponding URLs. Update the crawlPage function in Crawler.js to process the newly discovered URLs and extract product information from those pages.
+
+2. Handling Domains beyond Walgreens.com:
+   To crawl and collect information from other domains, modify the Crawler class in Crawler.js. Allow the class to accept a different base URL and starting URL as parameters. Adjust the logic in getUrlsFromHtml function in getUrlsFromHtml.js to handle different HTML structures and URL patterns specific to the target domain. Customizations may be required based on the structure and requirements of each website.
+
+Please note that extending the application to handle different domains may require additional customization and adaptation based on the specific structure and requirements of each website.

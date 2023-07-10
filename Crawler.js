@@ -13,19 +13,20 @@ class Crawler {
   }
 
   async crawlPage(currentUrl) {
+    // Check if the current URL belongs to the same domain
     const baseUrlObj = new URL(this.baseUrl);
     const currentUrlObj = new URL(currentUrl);
-
     if (baseUrlObj.hostname !== currentUrlObj.hostname) {
       return this.pages;
     }
 
+    // Skip if the current URL has already been visited
     if (this.visitedUrls.has(currentUrl)) {
-      return this.pages; // Skip if the current URL has already been visited
+      return this.pages;
     }
-
     this.visitedUrls.add(currentUrl);
 
+    // Skip if the current URL has already been processed before
     if (this.pages[currentUrl] > 0) {
       this.pages[currentUrl]++;
       return this.pages;
@@ -33,10 +34,13 @@ class Crawler {
 
     let browser = null;
     try {
+      // Launch a headless browser instance
       browser = await puppeteer.launch({
         headless: "new",
       });
       const page = await browser.newPage();
+
+      // Enable request interception to handle XHR requests
       await page.setRequestInterception(true);
       page.on("request", (interceptedRequest) => {
         if (interceptedRequest.resourceType() === "xhr") {
@@ -46,6 +50,7 @@ class Crawler {
         }
       });
 
+      // Handle responses to XHR requests
       page.on("response", async (response) => {
         const request = response.request();
         if (request.resourceType() === "xhr" && response.status() <= 300) {
@@ -54,9 +59,12 @@ class Crawler {
             let products = responseBody.products;
             if (responseBody && products) {
               for (const product of products) {
+                // Stop crawling if enough products have been collected
                 if (this.products.length >= 10) {
                   return this.products;
                 }
+
+                // Create a Product object and add it to the list
                 const productInfo = new Product(
                   product.productInfo.prodId || null,
                   product.productInfo.productName || null,
@@ -80,6 +88,7 @@ class Crawler {
         }
       });
 
+      // Navigate to the current URL
       await page.goto(currentUrl);
     } catch (e) {
       console.log(e);
@@ -90,34 +99,30 @@ class Crawler {
     }
 
     try {
+      // Fetch the HTML content of the current URL
       const response = await fetch(currentUrl);
       if (response.status >= 400) {
         console.log(`Error: Status ${response.status}`);
         return this.pages;
       }
-      const contentType = response.headers.get("content-type");
-      if (contentType.includes("application/json")) {
-        const data = await response.json();
-        if (data && data.products) {
-          const productsData = data.products;
-        }
-      } else if (contentType.includes("text/html")) {
-        const htmlBody = await response.text();
-        let nextUrls = getUrlsFromHtml(
-          htmlBody,
-          this.baseUrl,
-          currentUrl,
-          this.visitedUrls
-        );
+      const htmlBody = await response.text();
 
-        for (const nextUrl of nextUrls) {
-          this.pages = await this.crawlPage(nextUrl);
-          if (this.products.length >= 10) {
-            return this.products;
-          }
+      // Extract the URLs from the HTML and continue crawling
+      let nextUrls = getUrlsFromHtml(
+        htmlBody,
+        this.baseUrl,
+        currentUrl,
+        this.visitedUrls
+      );
+
+      for (const nextUrl of nextUrls) {
+        // Recursively crawl the next URL
+        this.pages = await this.crawlPage(nextUrl);
+
+        // Stop crawling if enough products have been collected
+        if (this.products.length >= 10) {
+          return this.products;
         }
-      } else {
-        console.log(`Unsupported content type: ${contentType}`);
       }
     } catch (e) {
       console.log(e);
